@@ -1,0 +1,93 @@
+import java.util.HashMap;
+import java.util.Random;
+import java.util.Scanner;
+
+class URLShortener {
+    // HashMap to store long URLs and their short URLs
+    private HashMap<String, String> urlMap;
+    private HashMap<String, String> reverseUrlMap;
+    private HashMap<String, Integer> urlClickCount;
+    private static final String CHAR_SET = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    private static final int SHORT_URL_LENGTH = 6;
+    private Random random;
+
+    public URLShortener() {
+        urlMap = new HashMap<>();
+        reverseUrlMap = new HashMap<>();
+        urlClickCount = new HashMap<>();
+        random = new Random();
+    }
+
+    // Generate a unique short URL
+    private String generateShortURL() {
+        StringBuilder shortUrl = new StringBuilder();
+        for (int i = 0; i < SHORT_URL_LENGTH; i++) {
+            int index = random.nextInt(CHAR_SET.length());
+            shortUrl.append(CHAR_SET.charAt(index));
+        }
+        return shortUrl.toString();
+    }
+
+    // Shorten a given long URL
+    public String shortenURL(String longUrl) {
+        if (reverseUrlMap.containsKey(longUrl)) {
+            return reverseUrlMap.get(longUrl); // return existing short URL if present
+        }
+
+        String shortUrl;
+        do {
+            shortUrl = generateShortURL();
+        } while (urlMap.containsKey(shortUrl)); // Ensure unique short URL
+
+        urlMap.put(shortUrl, longUrl);
+        reverseUrlMap.put(longUrl, shortUrl);
+        urlClickCount.put(shortUrl, 0); // Initialize click count
+
+        return shortUrl;
+    }
+
+    // Retrieve the original URL given a short URL
+    public String getOriginalURL(String shortUrl) {
+        if (urlMap.containsKey(shortUrl)) {
+            urlClickCount.put(shortUrl, urlClickCount.get(shortUrl) + 1); // Update click count
+            return urlMap.get(shortUrl);
+        } else {
+            return "URL not found";
+        }
+    }
+
+    // Get click count for a specific short URL
+    public int getUrlClickCount(String shortUrl) {
+        return urlClickCount.getOrDefault(shortUrl, 0);
+    }
+
+    // Display analytics: URL usage and clicks
+    public void displayAnalytics() {
+        System.out.println("Analytics:");
+        for (String shortUrl : urlMap.keySet()) {
+            System.out.println("Short URL: " + shortUrl + " | Long URL: " + urlMap.get(shortUrl) 
+                                + " | Clicks: " + urlClickCount.get(shortUrl));
+        }
+    }
+
+    public static void main(String[] args) {
+        URLShortener urlShortener = new URLShortener();
+        Scanner sc=new Scanner(System.in);
+
+        // Test cases
+        String longUrl1 = sc.next();
+        String shortUrl1 = urlShortener.shortenURL(longUrl1);
+        System.out.println("Short URL for " + longUrl1 + " : " + shortUrl1);
+
+        String longUrl2 = sc.next();
+        String shortUrl2 = urlShortener.shortenURL(longUrl2);
+        System.out.println("Short URL for " + longUrl2 + " : " + shortUrl2);
+
+        // Retrieve original URLs
+        System.out.println("Original URL for " + shortUrl1 + " : " + urlShortener.getOriginalURL(shortUrl1));
+        System.out.println("Original URL for " + shortUrl2 + " : " + urlShortener.getOriginalURL(shortUrl2));
+
+        // Display analytics
+        urlShortener.displayAnalytics();
+    }
+}
